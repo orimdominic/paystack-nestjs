@@ -39,6 +39,6 @@ export class PaystackModule
     super();
   }
   onModuleInit() {
-    throw new Error('Method not implemented.');
+    throw new Error('Not implemented');
   }
 }
