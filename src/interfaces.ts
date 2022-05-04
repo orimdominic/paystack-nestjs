@@ -16,8 +16,8 @@ export interface PaystackModuleConfig {
     requestBodyProperty?: string;
 
     /**
-     * The prefix of the generated webhook handling controller. Defaults to
-     * 'paystack-webhooks'
+     * The prefix of the generated webhook handling controller class. Defaults to
+     * 'paystack'
      */
     controllerPrefix?: string;
 
