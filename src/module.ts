@@ -35,7 +35,8 @@ export class PaystackModule
         provide: Symbol('WEBHOOK_CONTROLLER_HACK'),
         inject: [PAYSTACK_MODULE_CONFIG_TOKEN],
         useFactory: ({ webhookConfig }: PaystackModuleConfig) => {
-          const controllerPrefix = webhookConfig.controllerPrefix || 'paystack';
+          const controllerPrefix =
+            webhookConfig?.controllerPrefix || 'paystack';
 
           Reflect.defineMetadata(
             PATH_METADATA,
@@ -43,7 +44,7 @@ export class PaystackModule
             PaystackWebhookController,
           );
 
-          webhookConfig.decorators.forEach((decor) =>
+          webhookConfig?.decorators.forEach((decor) =>
             decor(PaystackWebhookController),
           );
         },
