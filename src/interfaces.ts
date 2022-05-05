@@ -1,6 +1,10 @@
 export interface PaystackModuleConfig {
   readonly secretKey: string;
   /**
+   * Set to `true` to enable webhooks
+   */
+  readonly enableWebhook: boolean;
+  /**
    * Configuration for processing Paystack webhooks
    */
   webhookConfig?: {
@@ -12,7 +16,7 @@ export interface PaystackModuleConfig {
 
     /**
      * The prefix of the generated webhook handling controller class. Defaults to
-     * 'paystack'
+     * 'paystack/webhook'
      */
     controllerPrefix?: string;
 

@@ -30,7 +30,9 @@ class ChargeSuccessfulService {
     testReceivePaystackFn(event);
   }
 }
+
 type ModuleType = 'forRoot' | 'forRootAsync';
+
 const cases: [ModuleType, string | undefined][] = [
   ['forRoot', undefined],
   ['forRoot', 'paystack'],
@@ -46,11 +48,12 @@ describe.each(cases)(
     let stripePayloadService;
 
     const paystackWebhookEndpoint = controllerPrefix
-      ? `/${controllerPrefix}/webhook`
+      ? `/${controllerPrefix}`
       : defaultPaystackWebhookEndpoint;
 
     const moduleConfig: PaystackModuleConfig = {
       secretKey: 'secret',
+      enableWebhook: true,
       webhookConfig: {
         controllerPrefix,
         loggingConfiguration: {
@@ -94,7 +97,7 @@ describe.each(cases)(
         .mockImplementationOnce((_, body) => body);
 
       return request(app.getHttpServer())
-        .post(defaultPaystackWebhookEndpoint)
+        .post(paystackWebhookEndpoint)
         .set('x-paystack-signature', 'paystack')
         .send(expectedEvent)
         .expect(200)
