@@ -3,7 +3,7 @@ export interface PaystackModuleConfig {
   /**
    * Set to `true` to enable webhooks
    */
-  readonly enableWebhook: boolean;
+  readonly enableWebhook?: boolean;
   /**
    * Configuration for processing Paystack webhooks
    */
