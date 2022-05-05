@@ -1,73 +1,174 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# paystack-nestjs
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Integrate Paystack APIs with your NestJS application. This library comes with support for handling Paystack webhook events with ease using decorators, for free 🤓
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
+1. API client: An injectable Paystack client to interact with Paystack APIs.
 
-## Description
+2. [Webhook event verification](https://paystack.com/docs/payments/webhooks/#verify-event-origin): Automatically verifies that calls to your webhook endpoint are from Paystack. Errors on calls from non-Paystack servers. It also returns a `200` by default for you.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+3. Handle specific events: Permits you to create providers that handle specific events using decorators. You can do away with implementing complex `switch` and `if...else` statements to determine what function/provider will handle an event.
 
 ## Installation
 
 ```bash
-$ npm install
+# npm
+npm install paystack-nestjs
+
+# yarn
+yarn add paystack-nestjs
 ```
 
-## Running the app
+## Usage
 
-```bash
-# development
-$ npm run start
+### Paystack client
 
-# watch mode
-$ npm run start:dev
+1. Import the library into the module that handles Paystack payments (`PaymentModule` in this case)
+```ts
+// payment.module.ts
 
-# production mode
-$ npm run start:prod
+import { Module } from '@nestjs/common';
+import { PaymentController } from './payment.controller';
+import { PaystackModule } from 'paystack-nestjs';
+
+@Module({
+  imports: [
+    PaystackModule.forRoot(PaystackModule, {
+      secretKey: 'sk_4r3y0ur3a11ytry1n9t0f19ur3th1s0ut'
+    }),
+  ],
+  controllers: [PaymentController],
+})
+export class PaymentModule {}
+```
+For an asynchronous setup, use `PaystackModule.forRootAsync`
+
+2. Inject the client into a controller or provider via the constructor
+```ts
+// payment.controller.ts
+
+import { Body, Controller } from '@nestjs/common';
+import { InjectPaystackClient } from 'paystack-nestjs';
+import { Paystack } from 'paystack-sdk';
+
+@Controller('paystack')
+export class PaymentController {
+  constructor(
+    @InjectPaystackClient() private readonly paystackClient: Paystack,
+  ) {}
+
+  @Post('pay')
+  async pay(@Body() body) {
+    await this.paystackClient.charge.create({
+      email: body.email,
+      amount: '24000',
+      reference: body.trxref,
+    });
+  }
+}
 ```
 
-## Test
+The full configuration of the second argument (`PaystackModuleConfig`) passed to `forRoot` method can be found in [interfaces.ts](/src/interfaces.ts)
 
-```bash
-# unit tests
-$ npm run test
+### Webhook
 
-# e2e tests
-$ npm run test:e2e
+To enable webhook configuration, set the `enableWebhook` property in `PaystackModuleConfig` to true.
 
-# test coverage
-$ npm run test:cov
+The module adds a `POST /paystack/webhook` route as the default webhook route. This means that if you have a controller method `m` that handles this route, and you have set up Paystack webhook on your developer console to forward events to `your.api/paystack/webhook`, method `m` will receive webhook events from Paystack.
+
+You can modify this route using the `webhookConfig.controllerPrefix` option in `PaystackModuleConfig`.
+
+```ts
+// payment.controller.ts
+
+import { Body, Controller } from '@nestjs/common';
+
+@Controller('paystack')
+export class PaymentController {
+
+  @Post('webhook')
+  handlePaystackEvent(@Body() payload) {
+    console.log('verified payload from Paystack =>', payload)
+  }
+}
 ```
 
-## Support
+### Handling Webhook Events with Decorated Methods
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+The module provides a `PaystackWebhookHandler` decorator that you can use to decorate methods that you want to use to handle specific events. You can set this up using the setup described below.
 
-## Stay in touch
+Let's say you want to have a specific method of a provider handle the `charge.success` event. You inject the module into the co-ordinating module like so
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. Configure and inject the module
+```ts
+// payment.module.ts
 
-## License
+import { Module } from '@nestjs/common';
+import { PaymentController } from './payment.controller';
+import { PaystackModule, PaystackWebhookService } from 'paystack-nestjs';
+import { ChargeSuccessService } from './charge-success.service';
 
-Nest is [MIT licensed](LICENSE).
+@Module({
+  imports: [
+    PaystackModule.forRoot(PaystackModule, {
+      secretKey: 'sk_4r3y0ur3a11ytry1n9t0f19ur3th1s0ut',
+      enableWebhook: true,
+    }),
+  ],
+  controllers: [PaymentController],
+  providers: [ChargeSuccessService, PaystackWebhookService],
+})
+export class PaymentModule {}
+```
+
+2. Create the provider that holds the method that handles the `charge.success` event. Decorate the (`handleChargeSuccess`) with `PaystackWebhookHandler` and the name of the event that the method should handle (`charge.success`)
+
+```ts
+// charge-success.service.ts
+
+import { Injectable } from '@nestjs/common';
+import { PaystackWebhookHandler } from 'paystack-nestjs';
+
+@Injectable()
+export class ChargeSuccessService {
+  @PaystackWebhookHandler('charge.success')
+  handleChargeSuccess(payload) {
+    console.log('from ChargeSuccessService');
+    console.log(`handling ${payload.event}`);
+  }
+}
+
+```
+
+3. Inject `PaystackWebhookService` into the controller and execute its `handleWebhookEvent`, passing the payload to it.
+
+```ts
+// payment.controller.ts
+
+import { Body, Controller, Post } from '@nestjs/common';
+import { PaystackWebhookService } from 'paystack-nestjs';
+
+@Controller('paystack')
+export class PaymentController {
+  constructor(
+    private readonly webhookService: PaystackWebhookService,
+  ) {}
+
+  @Post('webhook')
+  handlePaystackEvent(@Body() payload) {
+    this.webhookService.handleWebhookEvent(payload)
+  }
+}
+```
+
+Whenever there is a `charge.success` event, it will be handled by the `handleChargeSuccess` method of `ChargeSuccessService`. You can have more than one method handling the same event.
+
+## Helpful links
+- [Paystack webhooks](https://paystack.com/docs/payments/webhooks)
+- [Testing webhooks locally with the Paystack CLI](https://paystack.com/blog/product/cli#how-to-get-started-with-the-paystack-cli)
+
+## Contributing
+See a need, fill a need! PRs and issues are welcome!
+
+- Inpired by [@golevelup-nestjs/stripe](https://github.com/golevelup/packages/stripe)
+- Built on [@en1tan/paystack-node](https://github.com/en1tan/paystack-node)
