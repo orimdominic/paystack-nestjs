@@ -1,10 +1,17 @@
-import { Request, Headers, Controller, Post } from '@nestjs/common';
+import {
+  Request,
+  Headers,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectPaystackModuleConfig } from './decorators';
 import { PaystackModuleConfig } from './interfaces';
 import { PaystackPayloadService } from './payload.service';
 import { PaystackWebhookService } from './webhook.service';
 
-@Controller('/paystack')
+@Controller('paystack')
 export class PaystackWebhookController {
   private readonly requestBodyProperty: string;
 
@@ -14,10 +21,12 @@ export class PaystackWebhookController {
     private readonly payloadService: PaystackPayloadService,
     private readonly webhookService: PaystackWebhookService,
   ) {
-    this.requestBodyProperty = this.config.webhookConfig.requestBodyProperty;
+    this.requestBodyProperty =
+      this.config.webhookConfig?.requestBodyProperty || 'body';
   }
 
-  @Post('/webhook')
+  @Post('webhook')
+  @HttpCode(HttpStatus.OK)
   async handlePaystackEvents(
     @Headers('x-paystack-signature') signature: string,
     @Request() req,
