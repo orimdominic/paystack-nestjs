@@ -1,4 +1,4 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { PATH_METADATA } from '@nestjs/common/constants';
 import { ExternalContextCreator } from '@nestjs/core/helpers/external-context-creator';
 import { DiscoveryModule, DiscoveryService } from '@golevelup/nestjs-discovery';
@@ -17,6 +17,9 @@ import { PaystackWebhookService } from './webhook.service';
 import { PaystackPayloadService } from './payload.service';
 import { flatten, groupBy } from 'lodash';
 
+@Module({
+  controllers: [PaystackWebhookController],
+})
 export class PaystackModule
   extends createConfigurableDynamicRootModule<
     PaystackModule,
@@ -44,7 +47,7 @@ export class PaystackModule
             PaystackWebhookController,
           );
 
-          webhookConfig?.decorators.forEach((decor) =>
+          webhookConfig?.decorators?.forEach((decor) =>
             decor(PaystackWebhookController),
           );
         },
