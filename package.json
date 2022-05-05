@@ -16,6 +16,10 @@
   "files": [
     "lib"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orimdominic/paystack-nestjs.git"
+  },
   "scripts": {
     "prebuild": "rimraf lib",
     "build": "tsc -p tsconfig.build.json",
