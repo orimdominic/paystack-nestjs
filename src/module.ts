@@ -118,9 +118,9 @@ export class PaystackModule
       }),
     );
 
-    const handleWebhook = async (webhookEvent: { type: string }) => {
-      const { type } = webhookEvent;
-      const handlers = webhookHandlers.filter((x) => x.key === type);
+    const handleWebhook = async (webhookEvent: { event: string }) => {
+      const { event } = webhookEvent;
+      const handlers = webhookHandlers.filter((x) => x.key === event);
 
       if (handlers.length) {
         if (
@@ -128,7 +128,7 @@ export class PaystackModule
             ?.logMatchingEventHandlers
         ) {
           this.logger.log(
-            `Received webhook event for ${type}. Forwarding to ${handlers.length} event handlers`,
+            `Received webhook event for ${event}. Forwarding to ${handlers.length} event handlers`,
           );
         }
         await Promise.all(handlers.map((x) => x.handler(webhookEvent)));
