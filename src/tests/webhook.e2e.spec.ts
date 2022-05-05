@@ -11,7 +11,7 @@ import { PaystackWebhookEvent } from '../webhook-event.type';
 const testReceivePaystackFn = jest.fn();
 const defaultPaystackWebhookEndpoint = '/paystack/webhook';
 const eventType: PaystackWebhookEvent = 'charge.success';
-const expectedEvent = { type: eventType };
+const expectedEvent = { event: eventType };
 
 @Injectable()
 class SilentLogger extends ConsoleLogger {
