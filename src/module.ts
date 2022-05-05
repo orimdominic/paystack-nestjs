@@ -37,9 +37,14 @@ export class PaystackModule
       {
         provide: Symbol('WEBHOOK_CONTROLLER_HACK'),
         inject: [PAYSTACK_MODULE_CONFIG_TOKEN],
-        useFactory: ({ webhookConfig }: PaystackModuleConfig) => {
+        useFactory: ({
+          enableWebhook,
+          webhookConfig,
+        }: PaystackModuleConfig) => {
+          if (!enableWebhook) return;
+
           const controllerPrefix =
-            webhookConfig?.controllerPrefix || 'paystack';
+            webhookConfig?.controllerPrefix || 'paystack/webhook';
 
           Reflect.defineMetadata(
             PATH_METADATA,
@@ -69,8 +74,7 @@ export class PaystackModule
     super();
   }
   async onModuleInit() {
-    // If webhook config isn't provided, then client isn't interested in webhook
-    if (!this.paystackModuleConfig.webhookConfig) {
+    if (!this.paystackModuleConfig.enableWebhook) {
       return;
     }
 

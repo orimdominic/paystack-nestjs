@@ -11,7 +11,7 @@ import { PaystackModuleConfig } from './interfaces';
 import { PaystackPayloadService } from './payload.service';
 import { PaystackWebhookService } from './webhook.service';
 
-@Controller('paystack')
+@Controller('/paystack/webhook')
 export class PaystackWebhookController {
   private readonly requestBodyProperty: string;
 
@@ -25,7 +25,7 @@ export class PaystackWebhookController {
       this.config.webhookConfig?.requestBodyProperty || 'body';
   }
 
-  @Post('webhook')
+  @Post()
   @HttpCode(HttpStatus.OK)
   async handlePaystackEvents(
     @Headers('x-paystack-signature') signature: string,

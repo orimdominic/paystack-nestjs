@@ -26,6 +26,7 @@ describe('Paystack Module', () => {
       imports: [
         PaystackModule.forRoot(PaystackModule, {
           secretKey: 'secret',
+          enableWebhook: true,
         }),
       ],
       providers: [TestService],
@@ -47,6 +48,7 @@ describe('Paystack Module', () => {
       imports: [
         PaystackModule.forRoot(PaystackModule, {
           secretKey: 'secret',
+          enableWebhook: true,
           webhookConfig: {
             decorators: [TestDecorator()],
           },
