@@ -69,21 +69,11 @@ export class PaystackModule
     super();
   }
   async onModuleInit() {
-    // If they didn't provide a webhook config there's no reason
-    // to even attempt discovery
+    // If webhook config isn't provided, then client isn't interested in webhook
     if (!this.paystackModuleConfig.webhookConfig) {
       return;
     }
 
-    if (
-      this.paystackModuleConfig.webhookConfig &&
-      !this.paystackModuleConfig.webhookConfig?.secret
-    ) {
-      const errorMessage =
-        'Missing Paystack webhook secret. module is improperly configured and will be unable to process incoming webhooks from Paystack';
-      this.logger.error(errorMessage);
-      throw new Error(errorMessage);
-    }
     this.logger.log('Initializing Paystack Module for webhooks');
 
     const [paystackWebhookService] = (
