@@ -17,7 +17,7 @@ export class PaystackPayloadService {
     payload: JSONValue,
     validator = createHmac,
   ) {
-    const secret = this.paystackModuleConfig.webhookConfig.secret || '';
+    const secret = this.paystackModuleConfig.secretKey || '';
     const hash = validator('sha512', secret)
       .update(JSON.stringify(payload))
       .digest('hex');

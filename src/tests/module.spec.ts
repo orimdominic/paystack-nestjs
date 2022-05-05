@@ -48,7 +48,6 @@ describe('Paystack Module', () => {
         PaystackModule.forRoot(PaystackModule, {
           secretKey: 'secret',
           webhookConfig: {
-            secret: 'webhook-secret',
             decorators: [TestDecorator()],
           },
         }),

@@ -52,7 +52,6 @@ describe.each(cases)(
     const moduleConfig: PaystackModuleConfig = {
       secretKey: 'secret',
       webhookConfig: {
-        secret: 'webhook-secret',
         controllerPrefix,
         loggingConfiguration: {
           logMatchingEventHandlers: true,

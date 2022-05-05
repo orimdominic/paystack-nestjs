@@ -5,11 +5,6 @@ export interface PaystackModuleConfig {
    */
   webhookConfig?: {
     /**
-     * The webhook secret registered in the Paystack Dashboard
-     */
-    secret: string;
-
-    /**
      * The property on the request that contains the raw message body so that it
      * can be validated. Defaults to 'body'
      */
